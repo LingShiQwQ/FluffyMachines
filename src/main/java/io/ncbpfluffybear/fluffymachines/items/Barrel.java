@@ -80,6 +80,8 @@ public class Barrel extends NonHopperableBlock implements DoubleHologramOwner {
 
     protected final ItemSetting<Integer> barrelCapacity;
 
+    private boolean isTriedToRemoveIt = false;
+
     public Barrel(ItemGroup category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe,
                   int MAX_STORAGE) {
         super(category, item, recipeType, recipe);
@@ -159,9 +161,21 @@ public class Barrel extends NonHopperableBlock implements DoubleHologramOwner {
                     }
 
                     if (itemCount > 5) {
-                        Utils.send(p, "&在打破它之前,最好先把里面的东西拿走!");
+                        if(isTriedToRemoveIt) { 
+                            isTriedToRemoveIt = false;
+                            setStored(b, 0);
+                            updateMenu(b, inv, true, capacity);
+                            removeHologram(b);
+                            return;
+                        }
+
+                        Utils.send(p, "&c在打破它之前, 最好先把附近的东西拿走! 若确定要直接打破它, 请再次打破它! 注意! 这将丢失存储的所有物品!");
+                        isTriedToRemoveIt = true;
                         e.setCancelled(true);
                         return;
+                    }
+                    else {
+                        isTriedToRemoveIt = false;
                     }
 
                     inv.dropItems(b.getLocation(), INPUT_SLOTS);
